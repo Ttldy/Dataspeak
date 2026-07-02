@@ -1,0 +1,92 @@
+name: dataspeak
+
+services:
+  dataspeak-mysql:
+    image: mysql:8.0
+    container_name: dataspeak-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: dataspeak_root_change_me
+      MYSQL_DATABASE: dataspeak_demo
+      MYSQL_USER: dataspeak_readonly
+      MYSQL_PASSWORD: change_me
+    ports:
+      - "13306:3306"
+    volumes:
+      - dataspeak_mysql_data:/var/lib/mysql
+      - ./demo_data/mysql_schema.sql:/docker-entrypoint-initdb.d/001_dataspeak_schema.sql:ro
+    networks:
+      - dataspeak-net
+
+  dataspeak-redis:
+    image: redis:7-alpine
+    container_name: dataspeak-redis
+    restart: unless-stopped
+    ports:
+      - "16379:6379"
+    volumes:
+      - dataspeak_redis_data:/data
+    networks:
+      - dataspeak-net
+
+  dataspeak-etcd:
+    image: quay.io/coreos/etcd:v3.5.16
+    container_name: dataspeak-etcd
+    restart: unless-stopped
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: "1000"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+      ETCD_SNAPSHOT_COUNT: "50000"
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls=http://0.0.0.0:2379 --data-dir /etcd
+    volumes:
+      - dataspeak_etcd_data:/etcd
+    networks:
+      - dataspeak-net
+
+  dataspeak-minio:
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    container_name: dataspeak-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ACCESS_KEY: dataspeak_minio
+      MINIO_SECRET_KEY: dataspeak_minio_change_me
+    command: minio server /minio_data --console-address ":19001"
+    volumes:
+      - dataspeak_minio_data:/minio_data
+    networks:
+      - dataspeak-net
+
+  dataspeak-milvus:
+    image: milvusdb/milvus:v2.4.15
+    container_name: dataspeak-milvus
+    restart: unless-stopped
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: dataspeak-etcd:2379
+      MINIO_ADDRESS: dataspeak-minio:9000
+    ports:
+      - "19540:19530"
+    volumes:
+      - dataspeak_milvus_data:/var/lib/milvus
+    depends_on:
+      - dataspeak-etcd
+      - dataspeak-minio
+    networks:
+      - dataspeak-net
+
+networks:
+  dataspeak-net:
+    name: dataspeak-net
+
+volumes:
+  dataspeak_mysql_data:
+    name: dataspeak_mysql_data
+  dataspeak_redis_data:
+    name: dataspeak_redis_data
+  dataspeak_milvus_data:
+    name: dataspeak_milvus_data
+  dataspeak_minio_data:
+    name: dataspeak_minio_data
+  dataspeak_etcd_data:
+    name: dataspeak_etcd_data

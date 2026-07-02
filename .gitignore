@@ -1,0 +1,15 @@
+.env
+.codex/
+.agents/
+.codex_tmp/
+__pycache__/
+*.pyc
+.pytest_cache/
+demo_data/*.sqlite
+demo_data/schema_index.json
+logs-*.out
+logs-*.err
+docs/
+项目代码.pdf
+项目内容.pdf
+
