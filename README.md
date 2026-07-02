@@ -22,7 +22,8 @@ FastAPI、Streamlit、LangGraph、LangChain Core、SQLite/MySQL、Redis、Milvus
 ## 本地运行
 
 ```powershell
-cd /d C:\Users\24607\Desktop\项目\DataSpeak
+git clone https://github.com/Ttldy/Dataspeak.git
+cd DataSpeak
 conda activate ds
 pip install -r requirements.txt
 python scripts/init_demo_data.py
@@ -38,17 +39,17 @@ API 文档：`http://127.0.0.1:18088/docs`
 ### Windows 一键启动
 
 ```powershell
-cd /d C:\Users\24607\Desktop\项目\DataSpeak
+cd DataSpeak
 conda activate ds
 powershell -ExecutionPolicy Bypass -File scripts/start_dataspeak.ps1
 ```
 
-脚本会检查项目目录和 conda 环境，必要时从 `.env.example` 复制 `.env`，使用 `docker compose -p dataspeak up -d` 启动 DataSpeak 专属 Docker 服务，初始化 demo 数据、构建 Schema 索引，并在两个新的 PowerShell 窗口中分别启动 FastAPI 与 Streamlit。
+在项目根目录执行该脚本。脚本会检查项目目录和 conda 环境，必要时从 `.env.example` 复制 `.env`，使用 `docker compose -p dataspeak up -d` 启动 DataSpeak 专属 Docker 服务，初始化 demo 数据、构建 Schema 索引，并在两个新的 PowerShell 窗口中分别启动 FastAPI 与 Streamlit。
 
 ### Windows 一键关闭
 
 ```powershell
-cd /d C:\Users\24607\Desktop\项目\DataSpeak
+cd DataSpeak
 powershell -ExecutionPolicy Bypass -File scripts/stop_dataspeak.ps1
 ```
 
@@ -65,10 +66,9 @@ python -m dataspeak.evaluation.benchmark
 ### Windows 一键测试
 
 ```powershell
-cd /d C:\Users\24607\Desktop\项目\DataSpeak
+cd DataSpeak
 conda activate ds
 powershell -ExecutionPolicy Bypass -File scripts/test_dataspeak.ps1
 ```
 
 测试脚本只在 `ds` 环境中运行 `pytest -q`、`python scripts/smoke_test.py` 和 `python -m dataspeak.evaluation.benchmark`，不会启动、停止或删除 Docker 容器。
-
